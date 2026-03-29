@@ -5,15 +5,16 @@ Navigation Compose templates: AppNavHost and Screen sealed class.
 """
 
 
-def kt_nav_host(pkg: str) -> str:
-    """Génère AppNavHost.kt."""
+def kt_nav_host(nav_pkg: str, home_pkg: str) -> str:
+    """Génère AppNavHost.kt avec import correct de HomeScreen."""
     return f"""\
-package {pkg}
+package {nav_pkg}
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import {home_pkg}.HomeScreen
 
 @Composable
 fun AppNavHost(
@@ -24,7 +25,7 @@ fun AppNavHost(
         startDestination = Screen.Home.route
     ) {{
         composable(Screen.Home.route) {{
-            // HomeScreen sera importé depuis le package features/presentation
+            HomeScreen()
         }}
     }}
 }}

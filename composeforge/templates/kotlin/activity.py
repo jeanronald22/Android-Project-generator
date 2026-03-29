@@ -33,12 +33,20 @@ def kt_main_activity(cfg: ProjectConfig) -> str:
     # Resolve package paths depending on architecture
     if arch == 0:
         theme_pkg = f"{pkg}.presentation.theme"
+        home_pkg = f"{pkg}.presentation.screens.home"
         nav_pkg = f"{pkg}.presentation.navigation"
     else:
         theme_pkg = f"{pkg}.core.theme"
+        home_pkg = f"{pkg}.features.home.presentation.screens"
         nav_pkg = f"{pkg}.core.navigation"
 
-    content = "AppNavHost(navController = rememberNavController())" if "Navigation" in libs else "HomeScreen()"
+    # Imports conditionnels
+    if "Navigation" in libs:
+        content = "AppNavHost(navController = rememberNavController())"
+        screen_imports = f"import {nav_pkg}.AppNavHost"
+    else:
+        content = "HomeScreen()"
+        screen_imports = f"import {home_pkg}.HomeScreen"
 
     return f"""\
 package {pkg}
@@ -52,7 +60,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 {hilt_import}{nav_import}import {theme_pkg}.AppTheme
-{f"import {nav_pkg}.AppNavHost" if "Navigation" in libs else ""}
+{screen_imports}
 
 {hilt_anno}class MainActivity : ComponentActivity() {{
     override fun onCreate(savedInstanceState: Bundle?) {{
@@ -71,3 +79,4 @@ import androidx.compose.ui.Modifier
     }}
 }}
 """
+

@@ -136,7 +136,7 @@ class ProjectGenerator:
     def _write_navigation(self, paths) -> None:
         """Écrit les fichiers de navigation si Navigation est sélectionnée."""
         if self.cfg.has_lib("Navigation"):
-            write_file(f"{paths.nav_dir}/AppNavHost.kt", kt_nav_host(paths.nav_pkg))
+            write_file(f"{paths.nav_dir}/AppNavHost.kt", kt_nav_host(paths.nav_pkg, paths.home_pkg))
             write_file(f"{paths.nav_dir}/Screen.kt", kt_screen_sealed_class(paths.nav_pkg))
             ok("Navigation Compose configurée")
 

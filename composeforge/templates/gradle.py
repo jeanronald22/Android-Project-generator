@@ -42,10 +42,12 @@ kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref 
 
     if "Hilt" in libs:
         V += 'hilt               = "2.52"\n'
+        V += 'ksp                = "2.1.0-1.0.29"\n'
         L += 'hilt-android           = { group = "com.google.dagger", name = "hilt-android",          version.ref = "hilt" }\n'
         L += 'hilt-compiler          = { group = "com.google.dagger", name = "hilt-android-compiler",  version.ref = "hilt" }\n'
         L += 'hilt-navigation-compose = { group = "androidx.hilt",   name = "hilt-navigation-compose", version = "1.2.0"    }\n'
         P += 'hilt                = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }\n'
+        P += 'ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }\n'
 
     if "Retrofit" in libs:
         V += 'retrofit           = "2.11.0"\n'
@@ -74,11 +76,13 @@ kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref 
 
     if "Room" in libs:
         V += 'room               = "2.6.1"\n'
-        V += 'ksp                = "2.1.0-1.0.29"\n'
+        if "Hilt" not in libs:
+            V += 'ksp                = "2.1.0-1.0.29"\n'
         L += 'room-runtime            = { group = "androidx.room", name = "room-runtime", version.ref = "room" }\n'
         L += 'room-ktx                = { group = "androidx.room", name = "room-ktx",     version.ref = "room" }\n'
         L += 'room-compiler           = { group = "androidx.room", name = "room-compiler", version.ref = "room" }\n'
-        P += 'ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }\n'
+        if "Hilt" not in libs:
+            P += 'ksp                 = { id = "com.google.devtools.ksp", version.ref = "ksp" }\n'
 
     if "Ktor" in libs:
         V += 'ktor               = "3.0.3"\n'
@@ -109,8 +113,8 @@ def app_gradle(cfg: ProjectConfig) -> str:
 
     pl = 'plugins {\n    alias(libs.plugins.android.application)\n    alias(libs.plugins.kotlin.android)\n    alias(libs.plugins.kotlin.compose)\n'
     if "Hilt" in libs:
-        pl += '    alias(libs.plugins.hilt)\n    kotlin("kapt")\n'
-    if "Room" in libs:
+        pl += '    alias(libs.plugins.hilt)\n    alias(libs.plugins.ksp)\n'
+    if "Room" in libs and "Hilt" not in libs:
         pl += '    alias(libs.plugins.ksp)\n'
     pl += '}\n'
 
@@ -163,7 +167,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 """
     if "Hilt" in libs:
-        dep += "    implementation(libs.hilt.android)\n    kapt(libs.hilt.compiler)\n    implementation(libs.hilt.navigation.compose)\n"
+        dep += "    implementation(libs.hilt.android)\n    ksp(libs.hilt.compiler)\n    implementation(libs.hilt.navigation.compose)\n"
     if "Retrofit" in libs:
         dep += "    implementation(libs.retrofit)\n    implementation(libs.retrofit.gson)\n    implementation(libs.okhttp)\n    implementation(libs.okhttp.logging)\n"
     if "Navigation" in libs:
@@ -180,8 +184,7 @@ dependencies {
         dep += "    implementation(libs.ktor.client.core)\n    implementation(libs.ktor.client.android)\n    implementation(libs.ktor.client.content.negotiation)\n    implementation(libs.ktor.serialization.kotlinx.json)\n    implementation(libs.ktor.client.logging)\n"
     dep += "}\n"
 
-    if "Hilt" in libs:
-        dep += "\nkapt {\n    correctErrorTypes = true\n}\n"
+
 
     return pl + an + dep
 
