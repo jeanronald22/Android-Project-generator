@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "composeforge"
+version = "1.0.0"
+description = "Android Compose Project Generator — Clean Architecture scaffolding CLI"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+
+[project.scripts]
+composeforge = "composeforge.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["composeforge*"]
