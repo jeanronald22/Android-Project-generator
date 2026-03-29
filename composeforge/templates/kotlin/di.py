@@ -97,14 +97,21 @@ object DataStoreModule {{
 """
 
 
-def kt_room_module(pkg: str, app_name: str) -> str:
-    """Génère DatabaseModule.kt (Hilt + Room)."""
-    safe = app_name.replace(" ", "")
+def kt_room_module(di_pkg: str, db_pkg: str, safe_name: str, db_name: str) -> str:
+    """Génère DatabaseModule.kt (Hilt + Room).
+
+    Args:
+        di_pkg: Package du module DI (ex: com.example.app.di)
+        db_pkg: Package où se trouve la Database class (ex: com.example.app.data.local)
+        safe_name: Nom PascalCase de l'app (ex: MyCoolApp)
+        db_name: Nom lowercase pour le fichier .db (ex: mycoolapp)
+    """
     return f"""\
-package {pkg}
+package {di_pkg}
 
 import android.content.Context
 import androidx.room.Room
+import {db_pkg}.{safe_name}Database
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -117,11 +124,11 @@ import javax.inject.Singleton
 object DatabaseModule {{
 
     @Provides @Singleton
-    fun provide{safe}Database(@ApplicationContext ctx: Context): {safe}Database =
+    fun provide{safe_name}Database(@ApplicationContext ctx: Context): {safe_name}Database =
         Room.databaseBuilder(
             ctx,
-            {safe}Database::class.java,
-            "{safe.lower()}.db"
+            {safe_name}Database::class.java,
+            "{db_name}.db"
         ).build()
 }}
 """

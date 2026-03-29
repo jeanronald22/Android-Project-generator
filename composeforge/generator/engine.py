@@ -42,6 +42,16 @@ from composeforge.templates.misc import (
     gradle_wrapper_properties,
     proguard,
 )
+from composeforge.templates.resources import (
+    backup_rules_xml,
+    ic_launcher_background_xml,
+    ic_launcher_foreground_xml,
+    ic_launcher_round_xml,
+    ic_launcher_xml,
+    strings_xml,
+    themes_night_xml,
+    themes_xml,
+)
 
 
 class ProjectGenerator:
@@ -62,6 +72,7 @@ class ProjectGenerator:
         self._create_directories(paths)
         self._write_gradle_files()
         self._write_manifest()
+        self._write_resources()
         self._write_application()
         self._write_main_activity()
         self._write_theme(paths)
@@ -79,9 +90,18 @@ class ProjectGenerator:
 
     def _create_directories(self, paths) -> None:
         """Crée l'arborescence de dossiers."""
+        res = os.path.join(self.output_dir, "app", "src", "main", "res")
         common_dirs = [
             os.path.join(self.output_dir, "gradle"),
-            os.path.join(self.output_dir, "app", "src", "main", "res"),
+            res,
+            f"{res}/values",
+            f"{res}/values-night",
+            f"{res}/drawable",
+            f"{res}/drawable-v24",
+            f"{res}/mipmap-anydpi-v26",
+            f"{res}/xml",
+            os.path.join(self.output_dir, "app", "src", "test", "java"),
+            os.path.join(self.output_dir, "app", "src", "androidTest", "java"),
         ]
         make_dirs(common_dirs + paths.dirs)
         ok("Structure de dossiers créée")
@@ -104,6 +124,21 @@ class ProjectGenerator:
         )
         ok("AndroidManifest.xml généré")
 
+    def _write_resources(self) -> None:
+        """Écrit les fichiers de ressources Android (strings, themes, icons)."""
+        res = f"{self.output_dir}/app/src/main/res"
+        safe = self.cfg.safe_name
+
+        write_file(f"{res}/values/strings.xml", strings_xml(self.cfg.app_name))
+        write_file(f"{res}/values/themes.xml", themes_xml(safe))
+        write_file(f"{res}/values/ic_launcher_background.xml", ic_launcher_background_xml())
+        write_file(f"{res}/values-night/themes.xml", themes_night_xml(safe))
+        write_file(f"{res}/drawable-v24/ic_launcher_foreground.xml", ic_launcher_foreground_xml())
+        write_file(f"{res}/mipmap-anydpi-v26/ic_launcher.xml", ic_launcher_xml())
+        write_file(f"{res}/mipmap-anydpi-v26/ic_launcher_round.xml", ic_launcher_round_xml())
+        write_file(f"{res}/xml/backup_rules.xml", backup_rules_xml())
+        ok("Ressources Android générées (strings, themes, icons)")
+
     def _write_application(self) -> None:
         """Écrit MyApplication.kt si Hilt est sélectionné."""
         if self.cfg.has_lib("Hilt"):
@@ -125,7 +160,7 @@ class ProjectGenerator:
         """Écrit les fichiers de thème Material 3."""
         write_file(f"{paths.theme_dir}/Color.kt", kt_color(paths.theme_pkg))
         write_file(f"{paths.theme_dir}/Type.kt", kt_type(paths.theme_pkg))
-        write_file(f"{paths.theme_dir}/Theme.kt", kt_theme(paths.theme_pkg, self.cfg.app_name))
+        write_file(f"{paths.theme_dir}/Theme.kt", kt_theme(paths.theme_pkg, self.cfg.safe_name))
         ok("Thème Material 3 généré (Color, Type, Theme)")
 
     def _write_home_screen(self, paths) -> None:
@@ -149,30 +184,28 @@ class ProjectGenerator:
             if self.cfg.has_lib("DataStore"):
                 write_file(f"{paths.di_dir}/DataStoreModule.kt", kt_datastore_module(paths.di_pkg))
             if self.cfg.has_lib("Room"):
+                db_pkg = self._resolve_db_pkg()
                 write_file(
                     f"{paths.di_dir}/DatabaseModule.kt",
-                    kt_room_module(paths.di_pkg, self.cfg.app_name),
+                    kt_room_module(paths.di_pkg, db_pkg, self.cfg.safe_name, self.cfg.db_name),
                 )
             ok("Modules Hilt générés")
 
     def _write_room_database(self, paths) -> None:
         """Écrit la classe Room Database."""
         if self.cfg.has_lib("Room"):
-            if self.cfg.arch == 0:
-                from composeforge.core.writer import pkg_to_path
+            from composeforge.core.writer import pkg_to_path
 
-                pp = pkg_to_path(self.output_dir, self.cfg.package)
+            pp = pkg_to_path(self.output_dir, self.cfg.package)
+            if self.cfg.arch == 0:
                 db_dir = f"{pp}/data/local"
                 db_pkg = f"{self.cfg.package}.data.local"
             else:
-                from composeforge.core.writer import pkg_to_path
-
-                pp = pkg_to_path(self.output_dir, self.cfg.package)
                 db_dir = f"{pp}/features/home/data/local"
                 db_pkg = f"{self.cfg.package}.features.home.data.local"
             write_file(
                 f"{db_dir}/{self.cfg.safe_name}Database.kt",
-                kt_room_db(db_pkg, self.cfg.app_name),
+                kt_room_db(db_pkg, self.cfg.safe_name),
             )
             ok("Room Database généré")
 
@@ -201,3 +234,11 @@ class ProjectGenerator:
 
         write_file(f"{base}/README.md", generate_readme(self.cfg))
         ok("README.md généré")
+
+    # ── Helpers ───────────────────────────────────────
+
+    def _resolve_db_pkg(self) -> str:
+        """Résout le package de la Database class selon l'architecture."""
+        if self.cfg.arch == 0:
+            return f"{self.cfg.package}.data.local"
+        return f"{self.cfg.package}.features.home.data.local"
