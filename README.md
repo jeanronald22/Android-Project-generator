@@ -17,10 +17,50 @@ Génère un projet Android complet avec **Jetpack Compose**, **Clean Architectur
 - Python 3.8+
 - Aucune dépendance externe (100% stdlib)
 
+## 🔧 Installation
+
+### Linux / macOS
+
+```bash
+# 1. Cloner le projet
+git clone <repo-url>
+cd Android\ Project\ generator
+
+# 2. Créer un environnement virtuel et installer
+python3 -m venv .venv
+.venv/bin/pip install -e .
+
+# 3. (Optionnel) Rendre la commande accessible partout
+mkdir -p ~/.local/bin
+ln -sf "$(pwd)/.venv/bin/composeforge" ~/.local/bin/composeforge
+
+# Si ~/.local/bin n'est pas dans ton PATH :
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Windows
+
+```powershell
+# 1. Cloner le projet
+git clone <repo-url>
+cd "Android Project generator"
+
+# 2. Créer un environnement virtuel et installer
+python -m venv .venv
+.venv\Scripts\pip install -e .
+
+# 3. Utiliser la commande
+.venv\Scripts\composeforge
+```
+
 ## 🚀 Utilisation
 
 ```bash
-# Lancer le CLI interactif
+# Depuis n'importe quel dossier (après installation globale)
+composeforge
+
+# Ou directement depuis le dossier du projet
 python -m composeforge
 ```
 
