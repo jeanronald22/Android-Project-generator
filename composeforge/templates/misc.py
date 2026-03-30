@@ -88,6 +88,7 @@ def gradle_wrapper_properties() -> str:
 def gradle_properties() -> str:
     """Génère gradle.properties."""
     return (
+        "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m\n"
         "android.useAndroidX=true\n"
         "kotlin.code.style=official\n"
         "android.nonTransitiveRClass=true\n"

@@ -25,7 +25,8 @@ from composeforge.templates.kotlin.core import (
     kt_extensions,
     kt_resource,
 )
-from composeforge.templates.kotlin.database import kt_room_db
+from composeforge.templates.kotlin.database import kt_room_db, kt_room_entity, kt_room_dao
+from composeforge.templates.kotlin.tests import kt_example_unit_test, kt_example_instrumented_test
 from composeforge.templates.kotlin.di import (
     kt_app_module,
     kt_datastore_module,
@@ -81,6 +82,7 @@ class ProjectGenerator:
         self._write_di_modules(paths)
         self._write_room_database(paths)
         self._write_core_utilities(paths)
+        self._write_test_files()
         self._write_misc_files()
 
         print_success(self.cfg, self.output_dir)
@@ -110,7 +112,7 @@ class ProjectGenerator:
         """Écrit les fichiers Gradle."""
         base = self.output_dir
         write_file(f"{base}/gradle/libs.versions.toml", version_catalog(self.cfg.libs))
-        write_file(f"{base}/build.gradle.kts", root_gradle())
+        write_file(f"{base}/build.gradle.kts", root_gradle(self.cfg.libs))
         write_file(f"{base}/app/build.gradle.kts", app_gradle(self.cfg))
         write_file(f"{base}/settings.gradle.kts", settings_gradle(self.cfg.app_name))
         write_file(f"{base}/gradle.properties", gradle_properties())
@@ -192,7 +194,7 @@ class ProjectGenerator:
             ok("Modules Hilt générés")
 
     def _write_room_database(self, paths) -> None:
-        """Écrit la classe Room Database."""
+        """Écrit la classe Room Database, l'Entity et le DAO par défaut."""
         if self.cfg.has_lib("Room"):
             from composeforge.core.writer import pkg_to_path
 
@@ -207,7 +209,9 @@ class ProjectGenerator:
                 f"{db_dir}/{self.cfg.safe_name}Database.kt",
                 kt_room_db(db_pkg, self.cfg.safe_name),
             )
-            ok("Room Database généré")
+            write_file(f"{db_dir}/AppEntity.kt", kt_room_entity(db_pkg))
+            write_file(f"{db_dir}/AppDao.kt", kt_room_dao(db_pkg))
+            ok("Room Database, Entity et DAO générés")
 
     def _write_core_utilities(self, paths) -> None:
         """Écrit les utilitaires core."""
@@ -234,6 +238,25 @@ class ProjectGenerator:
 
         write_file(f"{base}/README.md", generate_readme(self.cfg))
         ok("README.md généré")
+
+    def _write_test_files(self) -> None:
+        """Écrit les fichiers de test (unitaires et instrumentés)."""
+        pkg_path = self.cfg.package.replace(".", "/")
+        test_dir = os.path.join(
+            self.output_dir, "app", "src", "test", "java", *self.cfg.package.split(".")
+        )
+        android_test_dir = os.path.join(
+            self.output_dir, "app", "src", "androidTest", "java", *self.cfg.package.split(".")
+        )
+        write_file(
+            f"{test_dir}/ExampleUnitTest.kt",
+            kt_example_unit_test(self.cfg.package),
+        )
+        write_file(
+            f"{android_test_dir}/ExampleInstrumentedTest.kt",
+            kt_example_instrumented_test(self.cfg.package),
+        )
+        ok("Fichiers de test générés (unit + instrumented)")
 
     # ── Helpers ───────────────────────────────────────
 

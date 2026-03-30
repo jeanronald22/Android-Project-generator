@@ -19,6 +19,9 @@ coreKtx            = "1.15.0"
 lifecycle          = "2.8.7"
 activityCompose    = "1.9.3"
 composeBom         = "2024.12.01"
+junit              = "4.13.2"
+junitExt           = "1.2.1"
+espresso           = "3.6.1"
 """
     L += """\
 [libraries]
@@ -32,6 +35,11 @@ androidx-ui-graphics             = { group = "androidx.compose.ui",      name = 
 androidx-ui-tooling              = { group = "androidx.compose.ui",      name = "ui-tooling"                                                 }
 androidx-ui-tooling-preview      = { group = "androidx.compose.ui",      name = "ui-tooling-preview"                                         }
 androidx-material3               = { group = "androidx.compose.material3", name = "material3"                                                }
+junit                            = { group = "junit",                    name = "junit",                    version.ref = "junit"            }
+androidx-junit                   = { group = "androidx.test.ext",        name = "junit",                    version.ref = "junitExt"         }
+androidx-espresso-core           = { group = "androidx.test.espresso",   name = "espresso-core",            version.ref = "espresso"         }
+androidx-ui-test-manifest        = { group = "androidx.compose.ui",      name = "ui-test-manifest"                                           }
+androidx-ui-test-junit4          = { group = "androidx.compose.ui",      name = "ui-test-junit4"                                             }
 """
     P += """\
 [plugins]
@@ -41,7 +49,7 @@ kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref 
 """
 
     if "Hilt" in libs:
-        V += 'hilt               = "2.52"\n'
+        V += 'hilt               = "2.56.2"\n'
         V += 'ksp                = "2.1.0-1.0.29"\n'
         L += 'hilt-android           = { group = "com.google.dagger", name = "hilt-android",          version.ref = "hilt" }\n'
         L += 'hilt-compiler          = { group = "com.google.dagger", name = "hilt-android-compiler",  version.ref = "hilt" }\n'
@@ -95,15 +103,22 @@ kotlin-compose      = { id = "org.jetbrains.kotlin.plugin.compose", version.ref 
     return V + "\n" + L + "\n" + P
 
 
-def root_gradle() -> str:
+def root_gradle(libs: list | None = None) -> str:
     """Génère le build.gradle.kts racine."""
-    return """\
+    if libs is None:
+        libs = []
+    extra = ""
+    if "Hilt" in libs or "Room" in libs:
+        extra += "    alias(libs.plugins.ksp)                 apply false\n"
+    if "Hilt" in libs:
+        extra += "    alias(libs.plugins.hilt)                apply false\n"
+    return f"""\
 // Top-level build file
-plugins {
+plugins {{
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android)      apply false
     alias(libs.plugins.kotlin.compose)      apply false
-}
+{extra}}}
 """
 
 
@@ -182,6 +197,16 @@ dependencies {
         dep += "    implementation(libs.room.runtime)\n    implementation(libs.room.ktx)\n    ksp(libs.room.compiler)\n"
     if "Ktor" in libs:
         dep += "    implementation(libs.ktor.client.core)\n    implementation(libs.ktor.client.android)\n    implementation(libs.ktor.client.content.negotiation)\n    implementation(libs.ktor.serialization.kotlinx.json)\n    implementation(libs.ktor.client.logging)\n"
+    dep += "\n    // ── Tests ──\n"
+    dep += "    testImplementation(libs.junit)\n"
+    dep += "    androidTestImplementation(libs.androidx.junit)\n"
+    dep += "    androidTestImplementation(libs.androidx.espresso.core)\n"
+    dep += "    androidTestImplementation(platform(libs.androidx.compose.bom))\n"
+    dep += "    androidTestImplementation(libs.androidx.ui.test.junit4)\n"
+    dep += "    debugImplementation(libs.androidx.ui.test.manifest)\n"
+    if "Hilt" in libs:
+        dep += "    androidTestImplementation(libs.hilt.android)\n"
+        dep += "    kspAndroidTest(libs.hilt.compiler)\n"
     dep += "}\n"
 
 

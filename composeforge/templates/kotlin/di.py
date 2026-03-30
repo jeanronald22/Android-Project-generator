@@ -111,6 +111,7 @@ package {di_pkg}
 
 import android.content.Context
 import androidx.room.Room
+import {db_pkg}.AppDao
 import {db_pkg}.{safe_name}Database
 import dagger.Module
 import dagger.Provides
@@ -130,5 +131,8 @@ object DatabaseModule {{
             {safe_name}Database::class.java,
             "{db_name}.db"
         ).build()
+
+    @Provides @Singleton
+    fun provideAppDao(db: {safe_name}Database): AppDao = db.appDao()
 }}
 """
