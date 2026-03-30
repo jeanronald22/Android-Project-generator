@@ -22,12 +22,15 @@ composeBom         = "2024.12.01"
 junit              = "4.13.2"
 junitExt           = "1.2.1"
 espresso           = "3.6.1"
+splashscreen       = "1.0.1"
+timber             = "5.0.1"
 """
     L += """\
 [libraries]
 kotlin-bom                       = { group = "org.jetbrains.kotlin",    name = "kotlin-bom",               version.ref = "kotlin"          }
 androidx-core-ktx                = { group = "androidx.core",            name = "core-ktx",                 version.ref = "coreKtx"         }
 androidx-lifecycle-runtime-ktx   = { group = "androidx.lifecycle",       name = "lifecycle-runtime-ktx",    version.ref = "lifecycle"        }
+androidx-lifecycle-compose       = { group = "androidx.lifecycle",       name = "lifecycle-runtime-compose", version.ref = "lifecycle"       }
 androidx-activity-compose        = { group = "androidx.activity",        name = "activity-compose",         version.ref = "activityCompose"  }
 androidx-compose-bom             = { group = "androidx.compose",         name = "compose-bom",              version.ref = "composeBom"       }
 androidx-ui                      = { group = "androidx.compose.ui",      name = "ui"                                                         }
@@ -40,6 +43,8 @@ androidx-junit                   = { group = "androidx.test.ext",        name = 
 androidx-espresso-core           = { group = "androidx.test.espresso",   name = "espresso-core",            version.ref = "espresso"         }
 androidx-ui-test-manifest        = { group = "androidx.compose.ui",      name = "ui-test-manifest"                                           }
 androidx-ui-test-junit4          = { group = "androidx.compose.ui",      name = "ui-test-junit4"                                             }
+androidx-splashscreen            = { group = "androidx.core",            name = "core-splashscreen",        version.ref = "splashscreen"     }
+timber                           = { group = "com.jakewharton.timber",   name = "timber",                   version.ref = "timber"           }
 """
     P += """\
 [plugins]
@@ -159,6 +164,7 @@ android {{
     }}
     buildFeatures {{
         compose = true
+        buildConfig = true
     }}
 }}
 
@@ -173,6 +179,7 @@ kotlin {{
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -180,6 +187,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.androidx.splashscreen)
+    implementation(libs.timber)
 """
     if "Hilt" in libs:
         dep += "    implementation(libs.hilt.android)\n    ksp(libs.hilt.compiler)\n    implementation(libs.hilt.navigation.compose)\n"

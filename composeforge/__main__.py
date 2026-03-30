@@ -16,6 +16,8 @@ from composeforge.generator.engine import ProjectGenerator
 
 def main() -> None:
     """Point d'entrée principal du CLI."""
+    dry_run = "--dry-run" in sys.argv
+
     header()
 
     # ── 1. Collect inputs ────────────────────────────
@@ -51,15 +53,25 @@ def main() -> None:
     # ── 3. Confirm ───────────────────────────────────
     print_recap(cfg)
 
-    confirm = ask("Confirmer la génération ? (o/n)", "o")
+    generator = ProjectGenerator(cfg)
+
+    # ── 4. Dry-run / Preview ─────────────────────────
+    if dry_run:
+        generator.preview()
+        sys.exit(0)
+
+    confirm = ask("Voir l'arborescence (p), Générer (o), ou Annuler (n) ?", "o")
+    if confirm and confirm.lower() in ("p", "preview", "dry-run"):
+        generator.preview()
+        confirm = ask("Générer le projet ? (o/n)", "o")
+
     if confirm and confirm.lower() not in ("o", "oui", "y", "yes"):
         from composeforge.cli.colors import C
 
         print(f"\n{C.Y}Annulé.{C.RS}")
         sys.exit(0)
 
-    # ── 4. Generate ──────────────────────────────────
-    generator = ProjectGenerator(cfg)
+    # ── 5. Generate ──────────────────────────────────
     generator.generate()
 
 

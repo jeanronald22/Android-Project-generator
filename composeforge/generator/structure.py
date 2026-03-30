@@ -23,6 +23,9 @@ class ArchitecturePaths:
     di_dir: str
     core_dir: str
     vm_dir: str
+    repo_iface_dir: str
+    repo_impl_dir: str
+    api_dir: str
 
     # Package names (Java/Kotlin dotted notation)
     home_pkg: str
@@ -30,6 +33,10 @@ class ArchitecturePaths:
     nav_pkg: str
     di_pkg: str
     core_pkg: str
+    vm_pkg: str
+    repo_iface_pkg: str
+    repo_impl_pkg: str
+    api_pkg: str
 
 
 class ArchitectureResolver:
@@ -80,11 +87,18 @@ class ArchitectureResolver:
             di_dir=f"{pp}/di",
             core_dir=f"{pp}/core",
             vm_dir=f"{pp}/presentation/screens/home",
+            repo_iface_dir=f"{pp}/domain/repository",
+            repo_impl_dir=f"{pp}/data/repository",
+            api_dir=f"{pp}/data/remote/api",
             home_pkg=f"{pkg}.presentation.screens.home",
             theme_pkg=f"{pkg}.presentation.theme",
             nav_pkg=f"{pkg}.presentation.navigation",
             di_pkg=f"{pkg}.di",
             core_pkg=f"{pkg}.core",
+            vm_pkg=f"{pkg}.presentation.screens.home",
+            repo_iface_pkg=f"{pkg}.domain.repository",
+            repo_impl_pkg=f"{pkg}.data.repository",
+            api_pkg=f"{pkg}.data.remote.api",
         )
 
     @staticmethod
@@ -96,8 +110,10 @@ class ArchitectureResolver:
                 f"{pp}/core/navigation",
                 f"{pp}/core/theme",
                 f"{pp}/core/util",
+                f"{pp}/features/home/data/remote",
                 f"{pp}/features/home/data/repository",
                 f"{pp}/features/home/domain/model",
+                f"{pp}/features/home/domain/repository",
                 f"{pp}/features/home/domain/usecase",
                 f"{pp}/features/home/presentation/screens",
                 f"{pp}/features/home/presentation/viewmodel",
@@ -109,11 +125,18 @@ class ArchitectureResolver:
             di_dir=f"{pp}/core/di",
             core_dir=f"{pp}/core/util",
             vm_dir=f"{pp}/features/home/presentation/viewmodel",
+            repo_iface_dir=f"{pp}/features/home/domain/repository",
+            repo_impl_dir=f"{pp}/features/home/data/repository",
+            api_dir=f"{pp}/features/home/data/remote",
             home_pkg=f"{pkg}.features.home.presentation.screens",
             theme_pkg=f"{pkg}.core.theme",
             nav_pkg=f"{pkg}.core.navigation",
             di_pkg=f"{pkg}.core.di",
             core_pkg=f"{pkg}.core.util",
+            vm_pkg=f"{pkg}.features.home.presentation.viewmodel",
+            repo_iface_pkg=f"{pkg}.features.home.domain.repository",
+            repo_impl_pkg=f"{pkg}.features.home.data.repository",
+            api_pkg=f"{pkg}.features.home.data.remote",
         )
 
     @staticmethod
@@ -142,9 +165,17 @@ class ArchitectureResolver:
             di_dir=f"{pp}/core/di",
             core_dir=f"{pp}/core/util",
             vm_dir=f"{pp}/features/home/presentation/viewmodel",
+            repo_iface_dir=f"{pp}/features/home/domain/repository",
+            repo_impl_dir=f"{pp}/features/home/data/repository",
+            api_dir=f"{pp}/features/home/data/remote",
             home_pkg=f"{pkg}.features.home.presentation.screens",
             theme_pkg=f"{pkg}.core.theme",
             nav_pkg=f"{pkg}.core.navigation",
             di_pkg=f"{pkg}.core.di",
             core_pkg=f"{pkg}.core.util",
+            vm_pkg=f"{pkg}.features.home.presentation.viewmodel",
+            repo_iface_pkg=f"{pkg}.features.home.domain.repository",
+            repo_impl_pkg=f"{pkg}.features.home.data.repository",
+            api_pkg=f"{pkg}.features.home.data.remote",
         )
+

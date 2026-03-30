@@ -22,12 +22,27 @@ object AppModule {{
 """
 
 
-def kt_network_module(pkg: str) -> str:
-    """Génère NetworkModule.kt (Hilt + Retrofit + OkHttp)."""
+def kt_network_module(pkg: str, api_pkg: str = "") -> str:
+    """Génère NetworkModule.kt (Hilt + Retrofit + OkHttp).
+
+    Args:
+        pkg: Package du module DI.
+        api_pkg: Package de l'ApiService (si spécifié, ajoute provideApiService).
+    """
+    api_import = ""
+    api_provide = ""
+    if api_pkg:
+        api_import = f"import {api_pkg}.ApiService\n"
+        api_provide = f"""
+
+    @Provides @Singleton
+    fun provideApiService(retrofit: Retrofit): ApiService =
+        retrofit.create(ApiService::class.java)"""
+
     return f"""\
 package {pkg}
 
-import dagger.Module
+{api_import}import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -63,7 +78,7 @@ object NetworkModule {{
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
-            .build()
+            .build(){api_provide}
 }}
 """
 
@@ -134,5 +149,34 @@ object DatabaseModule {{
 
     @Provides @Singleton
     fun provideAppDao(db: {safe_name}Database): AppDao = db.appDao()
+}}
+"""
+
+
+def kt_repository_module(di_pkg: str, repo_iface_pkg: str, repo_impl_pkg: str) -> str:
+    """Génère RepositoryModule.kt (Hilt @Binds pour les Repository).
+
+    Args:
+        di_pkg: Package du module DI.
+        repo_iface_pkg: Package de l'interface Repository.
+        repo_impl_pkg: Package de l'implémentation Repository.
+    """
+    return f"""\
+package {di_pkg}
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import {repo_iface_pkg}.HomeRepository
+import {repo_impl_pkg}.HomeRepositoryImpl
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {{
+
+    @Binds @Singleton
+    abstract fun bindHomeRepository(impl: HomeRepositoryImpl): HomeRepository
 }}
 """

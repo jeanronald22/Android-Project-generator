@@ -93,3 +93,47 @@ def gradle_properties() -> str:
         "kotlin.code.style=official\n"
         "android.nonTransitiveRClass=true\n"
     )
+
+
+def github_actions_ci() -> str:
+    """Génère .github/workflows/build.yml (CI Android)."""
+    return """\
+name: Android CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug
+
+    - name: Run unit tests
+      run: ./gradlew testDebugUnitTest
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/*.apk
+        retention-days: 7
+"""

@@ -8,15 +8,23 @@ from composeforge.core.config import ProjectConfig
 
 
 def kt_application(pkg: str) -> str:
-    """Génère MyApplication.kt (Hilt @HiltAndroidApp)."""
+    """Génère MyApplication.kt (Hilt @HiltAndroidApp + Timber)."""
     return f"""\
 package {pkg}
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 @HiltAndroidApp
-class MyApplication : Application()
+class MyApplication : Application() {{
+    override fun onCreate() {{
+        super.onCreate()
+        if (BuildConfig.DEBUG) {{
+            Timber.plant(Timber.DebugTree())
+        }}
+    }}
+}}
 """
 
 
@@ -59,11 +67,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 {hilt_import}{nav_import}import {theme_pkg}.AppTheme
 {screen_imports}
 
 {hilt_anno}class MainActivity : ComponentActivity() {{
     override fun onCreate(savedInstanceState: Bundle?) {{
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {{
